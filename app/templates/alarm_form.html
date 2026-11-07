@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ "Edit alarm" if alarm.id else "New alarm" }}</h2>
+<form class="alarm-form" method="post" action="{{ '/alarms/%d' % alarm.id if alarm.id else '/alarms' }}">
+  <label>Label <input name="label" value="{{ alarm.label }}"></label>
+  <label>Time <input type="time" name="time" value="{{ alarm.time_str }}" required></label>
+
+  <fieldset>
+    <legend>Days</legend>
+    <div class="days">
+    {% for d in days %}
+      <label class="day"><input type="checkbox" name="days" value="{{ d }}" {{ "checked" if d in alarm.day_list }}> {{ d | capitalize }}</label>
+    {% endfor %}
+    </div>
+  </fieldset>
+
+  {% if playlists %}
+  <label>Playlist
+    <select name="playlist_uri">
+      <option value="">Choose…</option>
+      {% for p in playlists %}
+        <option value="{{ p.uri }}" {{ "selected" if p.uri == alarm.playlist_uri }}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% endif %}
+  <label>{{ "…or paste" if playlists else "Playlist" }} a Spotify link / URI
+    <input name="playlist_custom" placeholder="https://open.spotify.com/playlist/…"
+           value="{{ alarm.playlist_uri if alarm.playlist_uri and alarm.playlist_uri not in (playlists | map(attribute='uri') | list) else '' }}">
+  </label>
+
+  <label class="inline"><input type="checkbox" name="shuffle" value="true" {{ "checked" if alarm.shuffle }}> Shuffle (different order every morning)</label>
+
+  <div class="row">
+    <label>Fade-in (minutes) <input type="number" name="fade_minutes" min="0" max="60" value="{{ alarm.fade_minutes }}"></label>
+    <label>Start volume % <input type="number" name="start_volume" min="0" max="100" value="{{ alarm.start_volume }}"></label>
+    <label>End volume % <input type="number" name="target_volume" min="0" max="100" value="{{ alarm.target_volume }}"></label>
+  </div>
+
+  <div class="form-actions">
+    <button class="big">Save</button>
+    <a class="button ghost" href="/">Cancel</a>
+  </div>
+</form>
+{% endblock %}

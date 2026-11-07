@@ -1,0 +1,39 @@
+[project]
+name = "radio-alarm"
+version = "0.1.0"
+description = "Spotify wake-up radio alarm for Raspberry Pi + Pimoroni Pirate Audio"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "jinja2>=3.1",
+    "python-multipart>=0.0.9",
+    "sqlmodel>=0.0.16",
+    "apscheduler>=3.10,<4",
+    "spotipy>=2.24",
+    "pillow>=10.1",
+]
+
+[project.optional-dependencies]
+pi = [
+    "gpiozero>=2.0",
+    "lgpio>=0.2",
+    "st7789>=0.0.4",
+]
+dev = [
+    "pytest>=8",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

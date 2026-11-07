@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Spotify didn't connect</h2>
+<p class="error">Spotify returned: <code>{{ error }}</code></p>
+<ul>
+  <li>Your Spotify account must own the app in the <a href="https://developer.spotify.com/dashboard">developer dashboard</a>, or be listed under the app's <em>User Management</em>.</li>
+  <li>Make sure you're signed in to that same account at <a href="https://accounts.spotify.com">accounts.spotify.com</a>.</li>
+  <li>The app's Redirect URI must be exactly <code>{{ redirect_uri }}</code>, with <em>Web API</em> selected.</li>
+  <li>A newly created app can take a few minutes to start working. <code>server_error</code> can also be a temporary Spotify problem.</li>
+</ul>
+<p><a class="button" href="/login">Try again</a> <a class="button ghost" href="/">Back</a></p>
+{% endblock %}

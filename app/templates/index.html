@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+{% if not spotify_configured %}
+  <div class="banner">Add <code>SPOTIFY_CLIENT_ID</code> and <code>SPOTIFY_CLIENT_SECRET</code> to <code>.env</code> and restart. See <code>deploy/SETUP.md</code>.</div>
+{% elif not spotify_authorized %}
+  <div class="banner">Spotify isn't connected yet. <a class="button" href="/login">Connect Spotify</a>
+    <small>Open this page via <code>http://127.0.0.1:8550</code> (use an SSH tunnel to the Pi) so the redirect works.</small></div>
+{% endif %}
+
+<section class="device">
+  <img id="screen" src="/display.png" alt="Device screen" width="240" height="240">
+  <div id="status">{% include "_status.html" %}</div>
+</section>
+
+<section>
+  <div class="section-head">
+    <h2>Alarms</h2>
+    <a class="button" href="/alarms/new">+ New alarm</a>
+  </div>
+  {% for a in alarms %}
+    <article class="alarm {{ '' if a.enabled else 'off' }}">
+      <div class="alarm-main">
+        <div class="alarm-time">{{ a.time_str }}</div>
+        <div>
+          <div class="alarm-label">{{ a.label }}</div>
+          <div class="alarm-meta">
+            {{ a.day_list | map("capitalize") | join(" ") or "No days" }}
+            &middot; {{ a.playlist_name or "No playlist" }}
+            &middot; fade {{ a.fade_minutes }} min{{ " · shuffle" if a.shuffle }}
+          </div>
+        </div>
+      </div>
+      <div class="alarm-actions">
+        <form method="post" action="/alarms/{{ a.id }}/toggle"><button>{{ "Disable" if a.enabled else "Enable" }}</button></form>
+        <form method="post" action="/alarms/{{ a.id }}/test"><button>Test now</button></form>
+        <a class="button ghost" href="/alarms/{{ a.id }}/edit">Edit</a>
+        <form method="post" action="/alarms/{{ a.id }}/delete" onsubmit="return confirm('Delete this alarm?')"><button class="ghost danger">Delete</button></form>
+      </div>
+    </article>
+  {% else %}
+    <p class="empty">No alarms yet.</p>
+  {% endfor %}
+  <p class="hint">Plays on the Spotify Connect device <strong>{{ device_name }}</strong>.</p>
+</section>
+
+<script>
+  // Refresh the live status panel and the screen preview.
+  setInterval(async () => {
+    try {
+      const r = await fetch("/status");
+      if (r.ok) document.getElementById("status").innerHTML = await r.text();
+    } catch (e) {}
+    document.getElementById("screen").src = "/display.png?t=" + Date.now();
+  }, 2000);
+</script>
+{% endblock %}

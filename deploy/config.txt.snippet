@@ -1,0 +1,10 @@
+# --- Pimoroni Pirate Audio (append to /boot/firmware/config.txt) ---
+# I2S DAC (MAX98357A) appears as the "sndrpihifiberry" card
+dtoverlay=hifiberry-dac
+# Amplifier enable pin
+gpio=25=op,dh
+# SPI for the ST7789 display
+dtparam=spi=on
+# Disable onboard audio so the DAC is the only sound card
+# (change the existing "dtparam=audio=on" line rather than adding a second one)
+dtparam=audio=off
