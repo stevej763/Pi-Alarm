@@ -76,6 +76,14 @@ def _center(draw: ImageDraw.ImageDraw, y: int, text: str, fnt, fill, max_width: 
     draw.text(((SIZE - w) / 2, y), text, font=fnt, fill=fill)
 
 
+def _center_shrink(draw: ImageDraw.ImageDraw, y: int, text: str, size: int, fill, bold: bool = True,
+                   max_width: int = SIZE - 16) -> None:
+    """Like _center, but shrinks the font until the text fits (for the clock, which must never be cut off)."""
+    while size > 12 and draw.textlength(text, font=font(size, bold)) > max_width:
+        size -= 2
+    _center(draw, y, text, font(size, bold), fill, max_width)
+
+
 def _corner_labels(draw: ImageDraw.ImageDraw, a: str, b: str, x: str, y: str) -> None:
     """Labels next to the physical buttons: A/B on the left edge, X/Y on the right."""
     f = font(13, bold=True)
@@ -126,7 +134,7 @@ def render(view: DisplayView) -> Image.Image:
 
 
 def _render_idle(draw: ImageDraw.ImageDraw, view: DisplayView) -> None:
-    _center(draw, 48, f"{view.now:%H:%M}", font(72, bold=True), TEXT)
+    _center_shrink(draw, 48, f"{view.now:%H:%M}", 72, TEXT)
     _center(draw, 132, f"{view.now:%A %-d %B}", font(17), DIM)
     if view.show_volume:
         _volume_bar(draw, view.status.volume)
@@ -169,7 +177,7 @@ def _render_snoozed(draw: ImageDraw.ImageDraw, view: DisplayView) -> None:
     _center(draw, 70, "Snoozing", font(26, bold=True), TEXT)
     if until:
         remaining = max(0, int((until - view.now).total_seconds()))
-        _center(draw, 108, f"{remaining // 60}:{remaining % 60:02d}", font(52, bold=True), ACCENT)
+        _center_shrink(draw, 108, f"{remaining // 60}:{remaining % 60:02d}", 52, ACCENT)
         _center(draw, 176, f"rings again at {until:%H:%M}", font(15), DIM)
 
 

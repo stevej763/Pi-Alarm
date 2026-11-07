@@ -24,4 +24,11 @@ Without Pi hardware the screen is rendered to `data/display.png` and shown live 
 you have the Pi, set `SPOTIFY_DEVICE_NAME` to another Spotify Connect device (e.g. your Mac's name in the Spotify app).
 The volume fade only affects real hardware (`AUDIO_BACKEND=alsa`). On the Mac it is simulated.
 
-Pi installation: see [deploy/SETUP.md](deploy/SETUP.md).
+## Pi installation
+On a fresh Raspberry Pi OS Lite install, run this over SSH as your normal user:
+```sh
+curl -fsSL https://raw.githubusercontent.com/stevej763/Pi-Alarm/main/deploy/setup-pi.sh -o /tmp/setup-pi.sh && REPO_URL=https://github.com/stevej763/Pi-Alarm.git bash /tmp/setup-pi.sh
+```
+It installs everything, sets up the Pirate Audio, raspotify and the systemd service, asks for your Spotify app
+credentials, and then reboots. It's safe to re-run. Afterwards, finish with steps 7–8 of [deploy/SETUP.md](deploy/SETUP.md),
+which also covers each step manually.
