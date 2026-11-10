@@ -22,6 +22,12 @@ class FakeSpotify:
     def pause(self) -> None:
         self.paused.set()
 
+    def reconfigure(self) -> None:
+        pass
+
+    def disconnect(self) -> None:
+        self.authorized = False
+
     def list_playlists(self):
         return [{"name": "Morning Mix", "uri": "spotify:playlist:abc"}]
 

@@ -11,7 +11,11 @@ a { color: var(--accent); }
 code { background: var(--panel); padding: 1px 5px; border-radius: 4px; }
 h2 { margin: 0; font-size: 1.2rem; }
 
-.top { max-width: 760px; margin: 0 auto; padding: 20px 16px; }
+.top { max-width: 760px; margin: 0 auto; padding: 20px 16px; display: flex; align-items: center;
+  justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.top nav { display: flex; gap: 16px; }
+.top nav a { color: var(--dim); text-decoration: none; }
+.top nav a:hover { color: var(--text); }
 .brand { color: var(--text); text-decoration: none; font-weight: 700; font-size: 1.15rem; letter-spacing: .02em; }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
   box-shadow: 0 0 12px var(--accent); margin-right: 6px; }
@@ -60,3 +64,24 @@ legend { color: var(--dim); font-size: .9rem; }
 .days { display: flex; flex-wrap: wrap; gap: 14px; }
 .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .form-actions { display: flex; gap: 10px; align-items: center; }
+
+section { margin-bottom: 28px; }
+h3 { font-size: 1rem; color: var(--dim); margin: 18px 0 8px; }
+button:disabled { opacity: .35; cursor: default; border-color: transparent; }
+.banner.ok { background: #16241a; border-color: #2d5a3a; }
+.banner.error { background: #2a1616; border-color: #5a2d2d; }
+.panel { background: var(--panel); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 14px;
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.inline-form, .upload { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.inline-form input { flex: 1; min-width: 180px; }
+.row-link { display: flex; justify-content: space-between; align-items: center; background: var(--panel);
+  border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; color: var(--text); text-decoration: none;
+  border: 1px solid transparent; }
+.row-link:hover { border-color: var(--accent); }
+.track { display: flex; gap: 10px; align-items: center; background: var(--panel); border-radius: var(--radius);
+  padding: 8px 12px; margin-bottom: 6px; }
+.track-info { flex: 1; min-width: 0; }
+.track-info > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.art { width: 40px; height: 40px; border-radius: 6px; background: var(--line); object-fit: cover; flex: none; }
+.pos { color: var(--dim); min-width: 1.5em; text-align: right; font-variant-numeric: tabular-nums; }
+.pick-list { display: grid; gap: 8px; }

@@ -1,4 +1,4 @@
-"""Polls Spotify for the current track (only while the alarm is ringing) and caches album art."""
+"""Polls the player for the current track (only while the alarm is ringing) and caches album art."""
 from __future__ import annotations
 
 import io
@@ -9,15 +9,15 @@ from typing import Callable, Optional
 
 from PIL import Image
 
-from .spotify import SpotifyService, Track
+from .models import Track
 
 log = logging.getLogger(__name__)
 
 
 class NowPlaying:
-    def __init__(self, spotify: SpotifyService, should_poll: Callable[[], bool], interval: float = 5.0,
+    def __init__(self, player, should_poll: Callable[[], bool], interval: float = 5.0,
                  on_change: Callable[[], None] = lambda: None):
-        self.spotify = spotify
+        self.player = player
         self.should_poll = should_poll
         self.interval = interval
         self.on_change = on_change
@@ -50,7 +50,7 @@ class NowPlaying:
 
     def _poll(self) -> None:
         try:
-            track = self.spotify.current_track()
+            track = self.player.current_track()
         except Exception as e:
             log.debug("current_track failed: %s", e)
             return

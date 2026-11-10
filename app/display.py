@@ -13,7 +13,7 @@ from typing import Callable, Optional, Tuple
 from PIL import Image, ImageDraw, ImageFont
 
 from .alarm_runner import State, Status
-from .spotify import Track
+from .models import Track
 
 log = logging.getLogger(__name__)
 
@@ -128,7 +128,7 @@ def render(view: DisplayView) -> Image.Image:
         _render_idle(draw, view)
 
     if st.error and st.state != State.IDLE:
-        msg = "Spotify unavailable - backup chime" if st.fallback_active else st.error
+        msg = "Music unavailable - backup chime" if st.fallback_active else st.error
         _center(draw, SIZE - 52, msg, font(12), ERROR)
     return img
 

@@ -2,7 +2,7 @@
 <div class="status status-{{ st.state.value }}">
   {% if st.state.value == "ringing" %}
     <div class="status-line"><strong>Ringing</strong> &middot; {{ st.alarm.label if st.alarm else "" }}</div>
-    {% if st.error %}<div class="error">{{ "Spotify unavailable, playing the backup chime" if st.fallback_active else st.error }}</div>{% endif %}
+    {% if st.error %}<div class="error">{{ "Couldn't play the playlist, playing the backup chime" if st.fallback_active }}<br><small>{{ st.error }}</small></div>{% endif %}
     <div class="controls">
       <form method="post" action="/snooze"><button class="big">Snooze</button></form>
       <form method="post" action="/stop"><button class="big danger">Stop</button></form>

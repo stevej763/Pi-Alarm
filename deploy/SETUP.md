@@ -26,6 +26,8 @@ amixer sset Master 40%                    # should change the loudness
 ```
 The softvol `Master` control only appears after something has played through the `default` device once. Run `speaker-test` before `amixer`.
 
+Steps 3, 4 and 7 are only needed for Spotify. Without it, upload MP3s on the web UI's **Music** page.
+
 ## 3. Spotify Connect (raspotify)
 ```sh
 sudo apt install -y curl
@@ -43,12 +45,12 @@ Open Spotify on your phone (same Wi-Fi), tap the devices icon and pick **Radio A
 
 ## 5. Install the app
 ```sh
-sudo apt install -y git python3-venv python3-dev python3-lgpio python3-gpiozero python3-spidev python3-pil fonts-dejavu-core
+sudo apt install -y git mpg123 python3-venv python3-dev python3-lgpio python3-gpiozero python3-spidev python3-pil fonts-dejavu-core
 git clone <your repo url> ~/radio-alarm
 cd ~/radio-alarm
 python3 -m venv --system-site-packages .venv   # reuse apt's GPIO libraries
 .venv/bin/pip install -e '.[pi]'
-cp .env.example .env && nano .env              # paste SPOTIFY_CLIENT_ID / SECRET, set HARDWARE=pi
+cp .env.example .env && nano .env              # set HARDWARE=pi (Spotify credentials can go in the web UI)
 ```
 
 ## 6. Run it as a service
@@ -66,15 +68,15 @@ The redirect has to land on `127.0.0.1`, so open the UI through an SSH tunnel fr
 ```sh
 ssh -L 8550:127.0.0.1:8550 <user>@radio-alarm.local
 ```
-Browse to <http://127.0.0.1:8550>, click **Connect Spotify** and approve. The token is saved to `data/spotify-token.json` and refreshes automatically. After that you can use `http://radio-alarm.local:8550` from any device on your network.
+Browse to <http://127.0.0.1:8550/settings>, tick **Use Spotify**, enter the Client ID/Secret if they aren't in `.env`, save, then click **Connect Spotify** and approve. The token is saved to `data/spotify-token.json` and refreshes automatically. After that you can use `http://radio-alarm.local:8550` from any device on your network.
 
 ## 8. Try it
-Create an alarm, press **Test now**: the playlist should start quietly on Radio Alarm and fade up.
+Upload some MP3s on the **Music** page (optionally group them into a playlist), create an alarm, press **Test now**: the playlist should start quietly and fade up.
 Buttons: **A** snooze · **B** stop (hold 2 s to pause/resume all alarms) · **X/Y** volume.
 
 ## Troubleshooting
 - **"Spotify device 'Radio Alarm' not found"**: check `systemctl status raspotify`, and that `SPOTIFY_DEVICE_NAME` matches `LIBRESPOT_NAME`. Select it once from the Spotify app.
-- **Backup chime plays instead of music**: the screen and web UI show the reason. Usually the network is down or the token was revoked (reconnect via step 7).
+- **Backup chime plays instead of music**: the web UI shows the reason. For Spotify, usually the network is down or the token was revoked (reconnect via step 7). For on-device playlists: the playlist is empty, or `mpg123` isn't installed.
 - **Button Y does nothing**: older Pirate Audio boards use GPIO20. Set `BUTTON_Y_PIN=20` in `.env`.
 - **Blank display**: confirm `/boot/firmware/config.txt` has `dtoverlay=spi0-2cs,no_miso` (and no `dtparam=spi=on`) and that `/dev/spidev0.1` exists. Check the log for "Display init failed". "GPIO9 currently claimed" means SPI is still holding the display's DC pin as MISO.
 - **`amixer: Unable to find simple control 'Master'`**: play something through `default` first (see step 2).

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Music · Radio Alarm{% endblock %}
+{% block content %}
+{% if msg %}<div class="banner ok">{{ msg }}</div>{% endif %}
+{% if error %}<div class="banner error">{{ error }}</div>{% endif %}
+
+<section>
+  <div class="section-head"><h2>Playlists</h2></div>
+  <form class="inline-form" method="post" action="/music/playlists">
+    <input name="name" placeholder="New playlist name" required>
+    <button>+ Create playlist</button>
+  </form>
+  {% for p in playlists %}
+    <a class="row-link" href="/music/playlists/{{ p.id }}">
+      <span class="alarm-label">{{ p.name }}</span>
+      <span class="alarm-meta">{{ counts.get(p.id, 0) }} track{{ "" if counts.get(p.id, 0) == 1 else "s" }}</span>
+    </a>
+  {% else %}
+    <p class="empty">No playlists yet. Alarms can also play all music on the device.</p>
+  {% endfor %}
+</section>
+
+<section>
+  <div class="section-head"><h2>Library</h2></div>
+  <form class="upload" method="post" action="/music/upload" enctype="multipart/form-data">
+    <input type="file" name="files" accept=".mp3,audio/mpeg" multiple required>
+    <button class="big">Upload MP3s</button>
+  </form>
+  {% for t in tracks %}
+    <div class="track">
+      {% if t.art_filename %}<img class="art" src="/music/tracks/{{ t.id }}/art" alt="" loading="lazy">{% else %}<div class="art"></div>{% endif %}
+      <div class="track-info">
+        <div class="alarm-label">{{ t.title }}</div>
+        <div class="alarm-meta">{{ t.artist or "Unknown artist" }}{{ " · " ~ t.album if t.album }} · {{ t.duration_str }}</div>
+      </div>
+      <a class="button ghost" href="/music/tracks/{{ t.id }}/audio" target="_blank">Preview</a>
+      <form method="post" action="/music/tracks/{{ t.id }}/delete" onsubmit="return confirm('Delete this track? It will be removed from every playlist.')">
+        <button class="ghost danger">Delete</button>
+      </form>
+    </div>
+  {% else %}
+    <p class="empty">No music uploaded yet.</p>
+  {% endfor %}
+</section>
+{% endblock %}

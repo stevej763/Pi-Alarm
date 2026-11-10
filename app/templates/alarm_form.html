@@ -14,20 +14,36 @@
     </div>
   </fieldset>
 
-  {% if playlists %}
   <label>Playlist
     <select name="playlist_uri">
       <option value="">Choose…</option>
-      {% for p in playlists %}
-        <option value="{{ p.uri }}" {{ "selected" if p.uri == alarm.playlist_uri }}>{{ p.name }}</option>
-      {% endfor %}
+      {% if unlisted %}
+        <option value="{{ alarm.playlist_uri }}" selected>{{ alarm.playlist_name or alarm.playlist_uri }} (unavailable)</option>
+      {% endif %}
+      {% if local_playlists %}
+      <optgroup label="On this device">
+        {% for p in local_playlists %}
+          <option value="{{ p.uri }}" {{ "selected" if p.uri == alarm.playlist_uri }}>{{ p.name }}</option>
+        {% endfor %}
+      </optgroup>
+      {% endif %}
+      {% if spotify_playlists %}
+      <optgroup label="Spotify">
+        {% for p in spotify_playlists %}
+          <option value="{{ p.uri }}" {{ "selected" if p.uri == alarm.playlist_uri }}>{{ p.name }}</option>
+        {% endfor %}
+      </optgroup>
+      {% endif %}
     </select>
   </label>
+  {% if not local_playlists and not spotify_playlists %}
+    <p class="hint">No playlists yet. <a href="/music">Upload some music</a>{% if not spotify_enabled %} or turn on Spotify in <a href="/settings">Settings</a>{% endif %}.</p>
   {% endif %}
-  <label>{{ "…or paste" if playlists else "Playlist" }} a Spotify link / URI
-    <input name="playlist_custom" placeholder="https://open.spotify.com/playlist/…"
-           value="{{ alarm.playlist_uri if alarm.playlist_uri and alarm.playlist_uri not in (playlists | map(attribute='uri') | list) else '' }}">
+  {% if spotify_enabled %}
+  <label>…or paste a Spotify link / URI
+    <input name="playlist_custom" placeholder="https://open.spotify.com/playlist/…" value="{{ custom_uri }}">
   </label>
+  {% endif %}
 
   <label class="inline"><input type="checkbox" name="shuffle" value="true" {{ "checked" if alarm.shuffle }}> Shuffle (different order every morning)</label>
 

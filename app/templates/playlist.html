@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ playlist.name }} · Radio Alarm{% endblock %}
+{% block content %}
+{% if msg %}<div class="banner ok">{{ msg }}</div>{% endif %}
+{% if error %}<div class="banner error">{{ error }}</div>{% endif %}
+
+<p><a href="/music">&larr; Music</a></p>
+<form class="inline-form" method="post" action="/music/playlists/{{ playlist.id }}/rename">
+  <input name="name" value="{{ playlist.name }}" required>
+  <button>Rename</button>
+</form>
+{% if used_by %}
+  <p class="hint">Used by: {{ used_by | map(attribute="label") | join(", ") }}</p>
+{% endif %}
+
+<section>
+  <div class="section-head"><h2>Tracks</h2></div>
+  {% for entry, t in entries %}
+    <div class="track">
+      <span class="pos">{{ loop.index }}</span>
+      <div class="track-info">
+        <div class="alarm-label">{{ t.title }}</div>
+        <div class="alarm-meta">{{ t.artist or "Unknown artist" }} · {{ t.duration_str }}</div>
+      </div>
+      <form method="post" action="/music/playlists/{{ playlist.id }}/entries/{{ entry.id }}/up"><button {{ "disabled" if loop.first }} title="Move up">&uarr;</button></form>
+      <form method="post" action="/music/playlists/{{ playlist.id }}/entries/{{ entry.id }}/down"><button {{ "disabled" if loop.last }} title="Move down">&darr;</button></form>
+      <form method="post" action="/music/playlists/{{ playlist.id }}/entries/{{ entry.id }}/remove"><button class="ghost danger">Remove</button></form>
+    </div>
+  {% else %}
+    <p class="empty">This playlist is empty.</p>
+  {% endfor %}
+  <p class="hint">Plays in this order unless the alarm has shuffle on.</p>
+</section>
+
+<section>
+  <div class="section-head"><h2>Add tracks</h2></div>
+  {% if available %}
+  <form method="post" action="/music/playlists/{{ playlist.id }}/add" class="pick-list">
+    {% for t in available %}
+      <label class="day"><input type="checkbox" name="track_ids" value="{{ t.id }}"> {{ t.title }} <span class="alarm-meta">{{ t.artist }}</span></label>
+    {% endfor %}
+    <div><button class="big">Add selected</button></div>
+  </form>
+  {% else %}
+    <p class="empty">Every track in the library is already in this playlist.</p>
+  {% endif %}
+  <h3>Upload new tracks into this playlist</h3>
+  <form class="upload" method="post" action="/music/upload" enctype="multipart/form-data">
+    <input type="hidden" name="playlist_id" value="{{ playlist.id }}">
+    <input type="file" name="files" accept=".mp3,audio/mpeg" multiple required>
+    <button>Upload</button>
+  </form>
+</section>
+
+<section>
+  <form method="post" action="/music/playlists/{{ playlist.id }}/delete"
+        onsubmit="return confirm('Delete this playlist? The music stays in the library.{{ ' Alarms using it will play the backup chime.' if used_by }}')">
+    <button class="ghost danger">Delete playlist</button>
+  </form>
+</section>
+{% endblock %}

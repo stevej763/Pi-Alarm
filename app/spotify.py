@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 import threading
 import time
-from dataclasses import dataclass
 from typing import Callable, List, Optional
 
 import spotipy
@@ -12,6 +11,7 @@ from spotipy.cache_handler import CacheFileHandler
 from spotipy.oauth2 import SpotifyOAuth
 
 from .config import Settings
+from .models import Track
 
 log = logging.getLogger(__name__)
 
@@ -20,15 +20,6 @@ SCOPES = "user-modify-playback-state user-read-playback-state playlist-read-priv
 
 class SpotifyError(Exception):
     pass
-
-
-@dataclass
-class Track:
-    title: str
-    artist: str
-    album: str
-    art_url: Optional[str]
-    is_playing: bool
 
 
 def _same_name(a: str, b: str) -> bool:
@@ -46,16 +37,30 @@ class SpotifyService:
         self._client: Optional[spotipy.Spotify] = None
         self._playlist_cache: tuple = (0.0, [])
         settings.data_dir.mkdir(parents=True, exist_ok=True)
-        self.oauth = SpotifyOAuth(
-            client_id=settings.spotify_client_id or None,
-            client_secret=settings.spotify_client_secret or None,
-            redirect_uri=settings.spotify_redirect_uri,
-            scope=SCOPES,
-            cache_handler=CacheFileHandler(cache_path=str(settings.token_cache)),
-            open_browser=False,
-        ) if settings.spotify_client_id else None
+        self.oauth: Optional[SpotifyOAuth] = None
+        self.reconfigure()
 
     # --- auth -----------------------------------------------------------------
+    def reconfigure(self) -> None:
+        """Rebuild the OAuth client from the current settings (after they're edited in the web UI)."""
+        s = self.settings
+        self.oauth = SpotifyOAuth(
+            client_id=s.spotify_client_id,
+            client_secret=s.spotify_client_secret or None,
+            redirect_uri=s.spotify_redirect_uri,
+            scope=SCOPES,
+            cache_handler=CacheFileHandler(cache_path=str(s.token_cache)),
+            open_browser=False,
+        ) if s.spotify_client_id else None
+        self._client = None
+        self._playlist_cache = (0.0, [])
+
+    def disconnect(self) -> None:
+        """Forget the saved Spotify login."""
+        self.settings.token_cache.unlink(missing_ok=True)
+        self._client = None
+        self._playlist_cache = (0.0, [])
+
     @property
     def configured(self) -> bool:
         return self.oauth is not None

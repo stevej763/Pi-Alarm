@@ -62,6 +62,10 @@ class Settings:
         return self.data_dir / "spotify-token.json"
 
     @property
+    def music_dir(self) -> Path:
+        return self.data_dir / "music"
+
+    @property
     def fallback_file(self) -> Path:
         return self.data_dir / "fallback-alarm.wav"
 

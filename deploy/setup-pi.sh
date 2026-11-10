@@ -33,7 +33,7 @@ step "System packages"
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    git curl alsa-utils python3-venv python3-dev python3-pip \
+    git curl alsa-utils mpg123 python3-venv python3-dev python3-pip \
     python3-lgpio python3-gpiozero python3-spidev python3-pil python3-numpy \
     fonts-dejavu-core
 
@@ -109,8 +109,9 @@ set_env HARDWARE pi
 set_env AUDIO_BACKEND alsa
 set_env TIMEZONE "$TIMEZONE"
 if [ -z "$(current SPOTIFY_CLIENT_ID)" ]; then
+    echo "Spotify is optional: alarms can play MP3s uploaded through the web UI."
     echo "Spotify app credentials (https://developer.spotify.com/dashboard; redirect URI http://127.0.0.1:8550/callback)."
-    echo "Leave blank to fill in later with: nano $APP_DIR/.env"
+    echo "Leave blank to skip, or add them later on the web UI's Settings page."
     id_in="$(ask 'SPOTIFY_CLIENT_ID: ')"
     [ -n "$id_in" ] && set_env SPOTIFY_CLIENT_ID "$id_in"
 fi
@@ -135,15 +136,13 @@ sudo systemctl enable radio-alarm
 
 step "Done"
 cat <<EOF
-Remaining one-time steps (see deploy/SETUP.md for detail):
-  1. After the reboot, open Spotify on your phone (same Wi-Fi) and pick the "Radio Alarm" device once.
-  2. From your laptop:  ssh -L 8550:127.0.0.1:8550 $RUN_USER@$(hostname).local
-     then browse to http://127.0.0.1:8550 and click "Connect Spotify".
+Next (see deploy/SETUP.md for detail):
+  1. Browse to http://$(hostname).local:8550, upload MP3s on the Music page and create an alarm.
+  2. Optional, Spotify: open Spotify on your phone (same Wi-Fi) and pick the "Radio Alarm" device once. Then from
+     your laptop run  ssh -L 8550:127.0.0.1:8550 $RUN_USER@$(hostname).local, browse to http://127.0.0.1:8550,
+     turn on Spotify in Settings and click "Connect Spotify".
   3. Logs:  journalctl -u radio-alarm -f
 EOF
-if [ -z "$(current SPOTIFY_CLIENT_ID)" ] || [ -z "$(current SPOTIFY_CLIENT_SECRET)" ]; then
-    warn "Spotify credentials are still empty: edit $APP_DIR/.env, then sudo systemctl restart radio-alarm"
-fi
 if [ "$NEEDS_REBOOT" -eq 1 ]; then
     reply="$(ask 'A reboot is needed for the audio/display config. Reboot now? [Y/n] ')"
     case "$reply" in [nN]*) echo "Reboot later with: sudo reboot" ;; *) sudo reboot ;; esac

@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-{% if not spotify_configured %}
-  <div class="banner">Add <code>SPOTIFY_CLIENT_ID</code> and <code>SPOTIFY_CLIENT_SECRET</code> to <code>.env</code> and restart. See <code>deploy/SETUP.md</code>.</div>
+{% if not spotify_enabled %}
+  {% if not has_music %}
+  <div class="banner">No music on the device yet. <a class="button" href="/music">Upload MP3s</a>
+    <small>Or turn on Spotify in <a href="/settings">Settings</a>.</small></div>
+  {% endif %}
+{% elif not spotify_configured %}
+  <div class="banner">Spotify is on but has no app credentials. Add them in <a href="/settings">Settings</a>.</div>
 {% elif not spotify_authorized %}
   <div class="banner">Spotify isn't connected yet. <a class="button" href="/login">Connect Spotify</a>
     <small>Open this page via <code>http://127.0.0.1:8550</code> (use an SSH tunnel to the Pi) so the redirect works.</small></div>
@@ -40,7 +45,7 @@
   {% else %}
     <p class="empty">No alarms yet.</p>
   {% endfor %}
-  <p class="hint">Plays on the Spotify Connect device <strong>{{ device_name }}</strong>.</p>
+  {% if spotify_enabled %}<p class="hint">Spotify playlists play on the Spotify Connect device <strong>{{ device_name }}</strong>.</p>{% endif %}
 </section>
 
 <script>

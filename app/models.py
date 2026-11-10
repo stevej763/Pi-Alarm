@@ -47,6 +47,46 @@ class AppSetting(SQLModel, table=True):
     value: str = ""
 
 
+class LocalTrack(SQLModel, table=True):
+    """An uploaded MP3 stored in the music folder."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    filename: str
+    title: str = ""
+    artist: str = ""
+    album: str = ""
+    duration: float = 0.0
+    art_filename: str = ""
+
+    @property
+    def duration_str(self) -> str:
+        seconds = int(self.duration)
+        return f"{seconds // 60}:{seconds % 60:02d}"
+
+
+class LocalPlaylist(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = "New playlist"
+
+
+class LocalPlaylistEntry(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    playlist_id: int = Field(index=True)
+    track_id: int = Field(index=True)
+    position: int = 0
+
+
+@dataclass
+class Track:
+    """What's playing right now, from Spotify or a local file."""
+
+    title: str
+    artist: str
+    album: str
+    art_url: Optional[str]
+    is_playing: bool
+
+
 @dataclass(frozen=True)
 class AlarmSpec:
     """Immutable snapshot of an alarm, handed to the runner so it doesn't hold DB objects."""

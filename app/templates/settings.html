@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Settings · Radio Alarm{% endblock %}
+{% block content %}
+{% if msg %}<div class="banner ok">{{ msg }}</div>{% endif %}
+
+<section>
+  <div class="section-head"><h2>Spotify</h2></div>
+  <p class="hint">Optional. Alarms can play music uploaded to the device without it. Spotify needs Premium, raspotify
+    running on the Pi, and an app from the <a href="https://developer.spotify.com/dashboard">developer dashboard</a>.</p>
+
+  {% if spotify_enabled %}
+  <div class="panel">
+    {% if not spotify_configured %}
+      Add your app's Client ID and Secret below, then connect.
+    {% elif spotify_authorized %}
+      <strong>Connected.</strong>
+      <form method="post" action="/settings/spotify/disconnect"><button class="ghost danger">Disconnect</button></form>
+    {% else %}
+      Not connected. <a class="button" href="/login">Connect Spotify</a>
+      <small class="hint">Open this page via <code>http://127.0.0.1:8550</code> (an SSH tunnel to the Pi) so the redirect works.</small>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <form class="alarm-form" method="post" action="/settings/spotify">
+    <label class="inline"><input type="checkbox" name="enabled" value="true" {{ "checked" if spotify_enabled }}> Use Spotify</label>
+    <label>Client ID <input name="client_id" value="{{ settings.spotify_client_id }}" autocomplete="off"></label>
+    <label>Client secret
+      <input type="password" name="client_secret" autocomplete="off"
+             placeholder="{{ 'Saved (leave blank to keep)' if settings.spotify_client_secret else '' }}">
+    </label>
+    <label>Redirect URI (register exactly this on the Spotify app)
+      <input name="redirect_uri" value="{{ settings.spotify_redirect_uri }}">
+    </label>
+    <label>Spotify Connect device name (raspotify's LIBRESPOT_NAME)
+      <input name="device_name" value="{{ settings.spotify_device_name }}">
+    </label>
+    <div class="form-actions"><button class="big">Save</button></div>
+  </form>
+</section>
+{% endblock %}

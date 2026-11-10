@@ -1,7 +1,7 @@
 [project]
 name = "radio-alarm"
 version = "0.1.0"
-description = "Spotify wake-up radio alarm for Raspberry Pi + Pimoroni Pirate Audio"
+description = "Wake-up radio alarm (local MP3s or Spotify) for Raspberry Pi + Pimoroni Pirate Audio"
 requires-python = ">=3.9"
 dependencies = [
     "fastapi>=0.110",
@@ -12,6 +12,7 @@ dependencies = [
     "apscheduler>=3.10,<4",
     "spotipy>=2.24",
     "pillow>=10.1",
+    "mutagen>=1.47",
 ]
 
 [project.optional-dependencies]

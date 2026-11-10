@@ -8,9 +8,11 @@ from typing import Optional
 from .alarm_runner import AlarmRunner, State
 from .audio import FallbackPlayer, ensure_fallback_wav, make_volume
 from .config import Settings
-from .db import Database
+from .db import SPOTIFY_ENABLED, SPOTIFY_FIELDS, Database
 from .display import DisplayLoop, DisplayView, PreviewOutput, ST7789Output
+from .library import Library
 from .now_playing import NowPlaying
+from .playback import LocalPlayer, PlaybackRouter
 from .scheduler import AlarmScheduler
 from .spotify import SpotifyService
 
@@ -18,10 +20,18 @@ log = logging.getLogger(__name__)
 
 
 class Services:
-    def __init__(self, settings: Settings, spotify=None, volume=None, fallback=None, use_hardware: Optional[bool] = None):
+    def __init__(self, settings: Settings, spotify=None, volume=None, fallback=None, use_hardware: Optional[bool] = None,
+                 local_player=None):
         self.settings = settings
         self.db = Database(settings.db_path)
+        for key in SPOTIFY_FIELDS:  # values saved from the web UI override .env
+            saved = self.db.get_setting(key)
+            if saved:
+                setattr(settings, key, saved)
         self.spotify = spotify or SpotifyService(settings)
+        self.library = Library(self.db, settings.music_dir)
+        self.local_player = local_player or LocalPlayer(self.library, on_change=lambda: self.now_playing.poke())
+        self.player = PlaybackRouter(self.local_player, self.spotify, lambda: self.spotify_enabled)
         self.volume = volume or make_volume(settings.audio_backend, settings.alsa_control, settings.alsa_card)
         self.fallback = fallback or FallbackPlayer(ensure_fallback_wav(settings.fallback_file))
 
@@ -31,11 +41,11 @@ class Services:
             tz = ZoneInfo(settings.timezone)
         self.scheduler = AlarmScheduler(on_alarm=lambda spec: self.runner.ring(spec),
                                         is_paused=lambda: self.db.alarms_paused, timezone=tz)
-        self.runner = AlarmRunner(self.spotify, self.volume, self.fallback, self.scheduler,
+        self.runner = AlarmRunner(self.player, self.volume, self.fallback, self.scheduler,
                                   snooze_minutes=settings.snooze_minutes, normal_volume=settings.normal_volume)
 
         self.now_playing = NowPlaying(
-            self.spotify,
+            self.player,
             should_poll=lambda: self.runner.state == State.RINGING and not self.runner.fallback_active,
             on_change=lambda: self.display.refresh(),
         )
@@ -63,6 +73,24 @@ class Services:
             track=self.now_playing.track,
             art=self.now_playing.art,
         )
+
+    @property
+    def spotify_enabled(self) -> bool:
+        default = "1" if self.spotify.configured else "0"
+        return self.db.get_setting(SPOTIFY_ENABLED, default) == "1"
+
+    def save_spotify_settings(self, enabled: bool, **values: str) -> None:
+        """Store Spotify settings from the web UI and apply them without a restart."""
+        self.db.set_setting(SPOTIFY_ENABLED, "1" if enabled else "0")
+        old_client_id = self.settings.spotify_client_id
+        for key in SPOTIFY_FIELDS:
+            value = values.get(key, "").strip()
+            if value:
+                self.db.set_setting(key, value)
+                setattr(self.settings, key, value)
+        self.spotify.reconfigure()
+        if self.settings.spotify_client_id != old_client_id:
+            self.spotify.disconnect()  # a login for the old app won't work with the new one
 
     def toggle_alarms_paused(self) -> None:
         self.db.alarms_paused = not self.db.alarms_paused

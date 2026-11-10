@@ -8,6 +8,9 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from .models import Alarm, AppSetting
 
 ALARMS_PAUSED = "alarms_paused"
+SPOTIFY_ENABLED = "spotify_enabled"
+# Spotify settings that can be edited in the web UI; stored under the same names as the Settings fields.
+SPOTIFY_FIELDS = ("spotify_client_id", "spotify_client_secret", "spotify_redirect_uri", "spotify_device_name")
 
 
 class Database:
