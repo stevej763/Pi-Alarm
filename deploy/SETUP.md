@@ -76,5 +76,5 @@ Buttons: **A** snooze · **B** stop (hold 2 s to pause/resume all alarms) · **X
 - **"Spotify device 'Radio Alarm' not found"**: check `systemctl status raspotify`, and that `SPOTIFY_DEVICE_NAME` matches `LIBRESPOT_NAME`. Select it once from the Spotify app.
 - **Backup chime plays instead of music**: the screen and web UI show the reason. Usually the network is down or the token was revoked (reconnect via step 7).
 - **Button Y does nothing**: older Pirate Audio boards use GPIO20. Set `BUTTON_Y_PIN=20` in `.env`.
-- **Blank display**: confirm `dtparam=spi=on` and that `/dev/spidev0.1` exists. Check the log for "Display init failed".
+- **Blank display**: confirm `/boot/firmware/config.txt` has `dtoverlay=spi0-2cs,no_miso` (and no `dtparam=spi=on`) and that `/dev/spidev0.1` exists. Check the log for "Display init failed". "GPIO9 currently claimed" means SPI is still holding the display's DC pin as MISO.
 - **`amixer: Unable to find simple control 'Master'`**: play something through `default` first (see step 2).

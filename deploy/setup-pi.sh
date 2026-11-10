@@ -62,6 +62,10 @@ BOOT_CONFIG=/boot/firmware/config.txt
 sudo cp -n "$BOOT_CONFIG" "$BOOT_CONFIG.radio-alarm.bak"
 while IFS= read -r line; do
     case "$line" in ''|'#'*) continue ;; esac
+    if [ "$line" = "dtoverlay=spi0-2cs,no_miso" ] && grep -qE '^dtparam=spi=on' "$BOOT_CONFIG"; then
+        sudo sed -i 's/^dtparam=spi=on/#dtparam=spi=on/' "$BOOT_CONFIG"
+        echo "changed: dtparam=spi=on -> commented out (GPIO9 is the display DC pin)"; NEEDS_REBOOT=1
+    fi
     if [ "$line" = "dtparam=audio=off" ] && grep -qE '^dtparam=audio=on' "$BOOT_CONFIG"; then
         sudo sed -i 's/^dtparam=audio=on/dtparam=audio=off/' "$BOOT_CONFIG"
         echo "changed: dtparam=audio=on -> off"; NEEDS_REBOOT=1

@@ -216,7 +216,8 @@ class ST7789Output:
         import st7789  # type: ignore
         from gpiozero import PWMLED  # type: ignore
 
-        self.disp = st7789.ST7789(port=0, cs=1, dc=9, backlight=None, rotation=90,
+        # Pin by name: an int makes gpiodevice guess the gpiochip, which can pick the wrong one (EINVAL).
+        self.disp = st7789.ST7789(port=0, cs=1, dc="GPIO9", backlight=None, rotation=90,
                                   width=SIZE, height=SIZE, spi_speed_hz=80_000_000)
         if hasattr(self.disp, "begin"):
             self.disp.begin()

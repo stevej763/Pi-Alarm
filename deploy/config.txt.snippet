@@ -3,8 +3,9 @@
 dtoverlay=hifiberry-dac
 # Amplifier enable pin
 gpio=25=op,dh
-# SPI for the ST7789 display
-dtparam=spi=on
+# SPI for the ST7789 display (CE1). no_miso leaves GPIO9 free for the display's DC pin
+# (replaces "dtparam=spi=on", which claims GPIO9 as MISO)
+dtoverlay=spi0-2cs,no_miso
 # Disable onboard audio so the DAC is the only sound card
 # (change the existing "dtparam=audio=on" line rather than adding a second one)
 dtparam=audio=off

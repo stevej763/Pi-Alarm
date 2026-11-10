@@ -50,7 +50,7 @@ class Services:
         if self.use_hardware:
             try:
                 return ST7789Output(self.settings.backlight_pin)
-            except Exception:
+            except (Exception, SystemExit):  # gpiodevice raises SystemExit for pin errors
                 log.exception("Display init failed; falling back to PNG preview")
         return PreviewOutput(self.settings.display_preview)
 
